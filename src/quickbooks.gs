@@ -1,1 +1,38 @@
-{"encoding": "base64", "content": "Ly8gUXVpY2tCb29rcyBpbnRlZ3JhdGlvbiBmdW5jdGlvbnMKCmZ1bmN0aW9uIHNldHVwUXVpY2tCb29rcygpIHsKICBjb25zdCBzZXJ2aWNlID0gZ2V0T0F1dGhTZXJ2aWNlKCk7CiAgaWYgKCFzZXJ2aWNlLmhhc0FjY2VzcygpKSB7CiAgICBjb25zdCBhdXRob3JpemF0aW9uVXJsID0gc2VydmljZS5nZXRBdXRob3JpemF0aW9uVXJsKCk7CiAgICBjb25zdCB0ZW1wbGF0ZSA9IEh0bWxTZXJ2aWNlLmNyZWF0ZVRlbXBsYXRlKAogICAgICAnPGEgaHJlZj0iPD89IGF1dGhvcml6YXRpb25VcmwgPz4iIHRhcmdldD0iX2JsYW5rIj5BdXRob3JpemU8L2E+JwogICAgKTsKICAgIHRlbXBsYXRlLmF1dGhvcml6YXRpb25VcmwgPSBhdXRob3JpemF0aW9uVXJsOwogICAgY29uc3QgcGFnZSA9IHRlbXBsYXRlLmV2YWx1YXRlKCk7CiAgICBTcHJlYWRzaGVldEFwcC5nZXRVaSgpLnNob3dNb2RhbERpYWxvZyhwYWdlLCAnQXV0aG9yaXplIFF1aWNrQm9va3MnKTsKICB9Cn0KCmZ1bmN0aW9uIGZldGNoUHJvZml0QW5kTG9zcyhzdGFydERhdGUsIGVuZERhdGUpIHsKICBjb25zdCB0b2tlbiA9IGdldE9BdXRoU2VydmljZSgpLmdldEFjY2Vzc1Rva2VuKCk7CiAgY29uc3QgdXJsID0gYCR7Q09ORklHLlFVSUNLQk9PS1NfQVBJX0JBU0V9L3JlcG9ydHMvUHJvZml0QW5kTG9zcz9zdGFydF9kYXRlPSR7c3RhcnREYXRlfSZlbmRfZGF0ZT0ke2VuZERhdGV9YDsKICAKICBjb25zdCByZXNwb25zZSA9IFVybEZldGNoQXBwLmZldGNoKHVybCwgewogICAgaGVhZGVyczogewogICAgICAnQXV0aG9yaXphdGlvbic6IGBCZWFyZXIgJHt0b2tlbn1gLAogICAgICAnQWNjZXB0JzogJ2FwcGxpY2F0aW9uL2pzb24nCiAgICB9CiAgfSk7CiAgCiAgcmV0dXJuIEpTT04ucGFyc2UocmVzcG9uc2UuZ2V0Q29udGVudFRleHQoKSk7Cn0KCmZ1bmN0aW9uIGhhbmRsZVF1aWNrQm9va3NDYWxsYmFjayhyZXF1ZXN0KSB7CiAgY29uc3Qgc2VydmljZSA9IGdldE9BdXRoU2VydmljZSgpOwogIGNvbnN0IGF1dGhvcml6ZWQgPSBzZXJ2aWNlLmhhbmRsZUNhbGxiYWNrKHJlcXVlc3QpOwogIGlmIChhdXRob3JpemVkKSB7CiAgICByZXR1cm4gSHRtbFNlcnZpY2UuY3JlYXRlSHRtbE91dHB1dCgnU3VjY2VzcyEgWW91IGNhbiBjbG9zZSB0aGlzIHRhYi4nKTsKICB9IGVsc2UgewogICAgcmV0dXJuIEh0bWxTZXJ2aWNlLmNyZWF0ZUh0bWxPdXRwdXQoJ0ZhaWxlZCB0byBhdXRob3JpemUuJyk7CiAgfQp9"}
+// QuickBooks integration functions
+
+function setupQuickBooks() {
+  const service = getOAuthService();
+  if (!service.hasAccess()) {
+    const authorizationUrl = service.getAuthorizationUrl();
+    const template = HtmlService.createTemplate(
+      '<a href="<?= authorizationUrl ?>" target="_blank">Authorize</a>'
+    );
+    template.authorizationUrl = authorizationUrl;
+    const page = template.evaluate();
+    SpreadsheetApp.getUi().showModalDialog(page, 'Authorize QuickBooks');
+  }
+}
+
+function fetchProfitAndLoss(startDate, endDate) {
+  const token = getOAuthService().getAccessToken();
+  const url = `${CONFIG.QUICKBOOKS_API_BASE}/reports/ProfitAndLoss?start_date=${startDate}&end_date=${endDate}`;
+  
+  const response = UrlFetchApp.fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json'
+    }
+  });
+  
+  return JSON.parse(response.getContentText());
+}
+
+function handleQuickBooksCallback(request) {
+  const service = getOAuthService();
+  const authorized = service.handleCallback(request);
+  if (authorized) {
+    return HtmlService.createHtmlOutput('Success! You can close this tab.');
+  } else {
+    return HtmlService.createHtmlOutput('Failed to authorize.');
+  }
+}
