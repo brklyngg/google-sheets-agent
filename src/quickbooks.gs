@@ -26,13 +26,3 @@ function fetchProfitAndLoss(startDate, endDate) {
   
   return JSON.parse(response.getContentText());
 }
-
-function handleQuickBooksCallback(request) {
-  const service = getOAuthService();
-  const authorized = service.handleCallback(request);
-  if (authorized) {
-    return HtmlService.createHtmlOutput('Success! You can close this tab.');
-  } else {
-    return HtmlService.createHtmlOutput('Failed to authorize.');
-  }
-}
