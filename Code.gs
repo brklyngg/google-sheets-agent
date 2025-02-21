@@ -1,1 +1,44 @@
-Y29uc3QgQ09ORklHID0gewogIFFVSUNLQk9PS1NfQVBJX0JBU0U6ICdodHRwczovL3F1aWNrYm9va3MuYXBpLmludHVpdC5jb20vdjMvY29tcGFueScsICAgClNDT1BFUzogWydodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9hdXRoL3NwcmVhZHNoZWV0cycsICdjb20uaW50dWl0LnF1aWNrYm9va3MuYWNjb3VudGluZyddCn07CgpmdW5jdGlvbiBvbk9wZW4oKSB7CiAgU3ByZWFkc2hlZXRBcHAuZ2V0VWkoKQogICAgLmNyZWF0ZU1lbnUoJ0FJIEFnZW50JykKICAgIC5hZGRJdGVtKCdBbmFseXplIFdvcmtib29rJywgJ2FuYWx5emVXb3JrYm9vaycpCiAgICAuYWRkSXRlbSgnQ2hhdCBJbnRlcmZhY2UnLCAnc2hvd0NoYXRTaWRlYmFyJykKICAgIC5hZGRJdGVtKCdDb25uZWN0IFF1aWNrQm9va3MnLCAnc2V0dXBRdWlja0Jvb2tzJykKICAgIC5hZGRUb1VpKCk7Cn0KCmZ1bmN0aW9uIGFuYWx5emVXb3JrYm9vaygpIHsKICBjb25zdCBzcyA9IFNwcmVhZHNoZWV0QXBwLmdldEFjdGl2ZSgpOwogIGNvbnN0IHNoZWV0cyA9IHNzLmdldFNoZWV0cygpOwogIGxldCBhbmFseXNpcyA9IHsKICAgIHNoZWV0Q291bnQ6IHNoZWV0cy5sZW5ndGgsCiAgICBzaGVldHM6IHt9CiAgfTsKCiAgc2hlZXRzLmZvckVhY2goc2hlZXQgPT4gewogICAgYW5hbHlzaXMuc2hlZXRzW3NoZWV0LmdldE5hbWUoKV0gPSBhbmFseXplU2hlZXQoc2hlZXQpOwogIH0pOwogIHJldHVybiBhbmFseXNpczsKfQoKZnVuY3Rpb24gYW5hbHl6ZVNoZWV0KHNoZWV0KSB7CiAgY29uc3QgcmFuZ2UgPSBzaGVldC5nZXREYXRhUmFuZ2UoKTsKICBjb25zdCB2YWx1ZXMgPSByYW5nZS5nZXRWYWx1ZXMoKTsKICBjb25zdCBmb3JtdWxhcyA9IHJhbmdlLmdldEZvcm11bGFzKCk7CiAgcmV0dXJuIHsKICAgIHR5cGU6IGRldGVjdFNoZWV0VHlwZSh2YWx1ZXMpLAogICAgcm93Q291bnQ6IHZhbHVlcy5sZW5ndGgsCiAgICBjb2xDb3VudDogdmFsdWVzWzBdLmxlbmd0aCwKICAgIGRlcGVuZGVuY2llczogYW5hbHl6ZURlcGVuZGVuY2llcyhmb3JtdWxhcyksCiAgICBzdW1tYXJ5OiBnZW5lcmF0ZVNoZWV0U3VtbWFyeSh2YWx1ZXMpCiAgfTsKfQo=
+// Google Sheets AI Agent with QuickBooks Integration
+
+const CONFIG = {
+  QUICKBOOKS_API_BASE: 'https://quickbooks.api.intuit.com/v3/company',
+  SCOPES: ['https://www.googleapis.com/auth/spreadsheets', 'com.intuit.quickbooks.accounting']
+};
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('AI Agent')
+    .addItem('Analyze Workbook', 'analyzeWorkbook')
+    .addItem('Chat Interface', 'showChatSidebar')
+    .addItem('Connect QuickBooks', 'setupQuickBooks')
+    .addToUi();
+}
+
+function analyzeWorkbook() {
+  const ss = SpreadsheetApp.getActive();
+  const sheets = ss.getSheets();
+  let analysis = {
+    sheetCount: sheets.length,
+    sheets: {}
+  };
+
+  sheets.forEach(sheet => {
+    analysis.sheets[sheet.getName()] = analyzeSheet(sheet);
+  });
+
+  return analysis;
+}
+
+function analyzeSheet(sheet) {
+  const range = sheet.getDataRange();
+  const values = range.getValues();
+  const formulas = range.getFormulas();
+
+  return {
+    type: detectSheetType(values),
+    rowCount: values.length,
+    colCount: values[0].length,
+    dependencies: analyzeDependencies(formulas),
+    summary: generateSheetSummary(values)
+  };
+}
